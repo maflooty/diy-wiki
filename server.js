@@ -47,15 +47,14 @@ function jsonError(res, message) {
 
 
 app.get('/api/page/:slug', async (req, res) => {
-  const filename =`${req.params.slug}.md`;
-  
-  const fullFilename = path.join(DATA_DIR, filename);
+  const filePath =path.join('data',`${req.params.slug}.md`);
   
   try {
-    const text = await readFile(fullFilename);
+    const text = await readFile(filePath, 'utf-8');
     
     res.json({ status: 'ok', body: text });
-  } catch {
+  
+  } catch (e) {
     res.json({ status: 'error', message: 'Page does not exist.' });
   }
 });
@@ -65,11 +64,18 @@ app.get('/api/page/:slug', async (req, res) => {
 // success response: {status: 'ok'}
 // failure response: {status: 'error', message: 'Could not write page.'}
 
-app.post('/api/page/:slug', (req, res) => {
-  req.body;
-  res.json({status: 'ok', body: 'Successfully'});
- 
-});
+app.post('/api/page/:slug', async (req, res) => {
+
+  const filePath =path.join('data',`${req.params.slug}.md`);
+  
+  const text = req.body.body;
+  try {
+      fs.writeFile(filePath, text);
+      res.json({status: 'ok'});
+    } catch (e) {
+      res.json({status: 'error', message: 'Could not write page.'});
+    }
+  });
 
 // GET: '/api/pages/all'
 // success response: {status:'ok', pages: ['fileName', 'otherFileName']}
@@ -95,7 +101,7 @@ app.get('/api/tags/all', async(req, res) => {
 // failure response: no failure response
 
 app.get('/api/tags/:tag', async(req, res) => {
- await res.json({status: 'ok', tag: 'about', pages: ['about', 'default']});
+ await res.json({status: 'ok', tag: 'about', pages: ['about', 'home']});
 });
 
 // If you want to see the wiki client, run npm install && npm build in the client folder,
